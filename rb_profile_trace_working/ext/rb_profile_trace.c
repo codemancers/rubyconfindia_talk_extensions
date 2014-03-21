@@ -19,7 +19,7 @@ profile_trace_hook(rb_event_flag_t event, VALUE data, VALUE self, ID mid, VALUE 
     VALUE iseq[1];
     int lines[1];
 
-    int num = rb_profile_frames(0, sizeof(iseq) / sizeof(VALUE), iseq, lines);
+    int num = rb_profile_frames(0, 1, iseq, lines);
 
     VALUE klss = rb_profile_frame_classpath(iseq[0]);
     VALUE meth = rb_profile_frame_method_name(iseq[0]);
@@ -28,11 +28,8 @@ profile_trace_hook(rb_event_flag_t event, VALUE data, VALUE self, ID mid, VALUE 
     char *method = StringValuePtr(meth);
 
     if (RTEST(klss)) {
-        if (rb_intern("A") == rb_intern(ptr)) {
-            if (rb_intern("to_string") == rb_intern(method)) {
-                _counter.count++;
-            }
-        }
+        if((strcmp(ptr, "A") == 0) && (strcmp(method, "to_string") == 0))
+            _counter.count++;
     }
 }
 
