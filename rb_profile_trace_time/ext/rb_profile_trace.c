@@ -33,7 +33,7 @@ profile_trace_entry_hook(rb_event_flag_t event, VALUE data, VALUE self, ID mid, 
     VALUE iseq[1];
     int lines[1];
 
-    int num = rb_profile_frames(0, sizeof(iseq) / sizeof(VALUE), iseq, lines);
+    int num = rb_profile_frames(0, 1, iseq, lines);
 
     VALUE klss = rb_profile_frame_classpath(iseq[0]);
     VALUE meth = rb_profile_frame_method_name(iseq[0]);
@@ -42,7 +42,8 @@ profile_trace_entry_hook(rb_event_flag_t event, VALUE data, VALUE self, ID mid, 
     char *method = StringValuePtr(meth);
 
     if (RTEST(klss)) {
-        _wall_times.entry_wall_time[_wall_times.count] = get_wall_time();
+        if ((strcmp(ptr, "A") == 0) && (strcmp(method, "to_string") == 0))
+            _wall_times.entry_wall_time[_wall_times.count] = get_wall_time();
     }
 }
 
@@ -52,18 +53,20 @@ profile_trace_exit_hook(rb_event_flag_t event, VALUE data, VALUE self, ID mid, V
     VALUE iseq[1];
     int lines[1];
 
-    int num = rb_profile_frames(0, sizeof(iseq) / sizeof(VALUE), iseq, lines);
+    int num = rb_profile_frames(0, 1, iseq, lines);
 
     VALUE klss = rb_profile_frame_classpath(iseq[0]);
     VALUE meth = rb_profile_frame_method_name(iseq[0]);
 
-    char *ptr = StringValuePtr(klss);
+    char *ptr    = StringValuePtr(klss);
     char *method = StringValuePtr(meth);
 
     if (RTEST(klss)) {
-        _walltime = get_wall_time() - _wall_times.entry_wall_time[_wall_times.count];
-        _wall_times.time_diff[_wall_times.count] = _walltime;
-        _wall_times.count++;
+        if ((strcmp(ptr, "A") == 0) && (strcmp(method, "to_string") == 0)) {
+            _walltime = get_wall_time() - _wall_times.entry_wall_time[_wall_times.count];
+            _wall_times.time_diff[_wall_times.count] = _walltime;
+            _wall_times.count++;
+        }
     }
 }
 
